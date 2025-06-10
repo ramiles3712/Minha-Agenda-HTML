@@ -752,7 +752,14 @@ body class=bg-gray-100 p-4 min-h-screen flex items-center justify-center
          Initialize Firebase and attach all DOM event listeners after the DOM is fully loaded
         document.addEventListener('DOMContentLoaded', async () = {
             try {
-                const firebaseConfig = typeof __firebase_config !== 'undefined'  JSON.parse(__firebase_config)  {};
+                const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_DOMINIO.firebaseapp.com",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_BUCKET.appspot.com",
+  messagingSenderId: "SEU_SENDER_ID",
+  appId: "SEU_APP_ID"
+};
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
