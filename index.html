@@ -1,0 +1,847 @@
+!DOCTYPE html
+html lang=pt
+head
+    meta charset=UTF-8
+    meta name=viewport content=width=device-width, initial-scale=1.0
+    titleMinhas Tarefas + Calendáriotitle
+    !-- Tailwind CSS CDN for styling --
+    script src=httpscdn.tailwindcss.comscript
+    style
+        body {
+            font-family 'Inter', sans-serif;
+            background-color #f8f8f8;  Equivalent to bg-gray-100 
+        }
+         Custom styles for better aesthetics and responsiveness 
+        .container {
+            max-width 90%;
+            margin 40px auto;
+            padding 20px;
+            background-color #ffffff;
+            border-radius 12px;
+            box-shadow 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .task-item {
+            display flex;
+            align-items center;
+            background-color #f0f8ff;  Light blue background for tasks 
+            padding 15px;
+            border-radius 10px;
+            margin-bottom 10px;
+            border 1px solid #e0e0e0;
+            transition transform 0.2s ease-in-out;
+            cursor pointer;
+        }
+        .task-itemhover {
+            transform translateY(-2px);
+        }
+        .task-completed .task-title,
+        .task-completed .task-datetime,
+        .task-completed .task-description,
+        .task-completed .task-tag {
+            text-decoration line-through;
+            color #888;
+        }
+        .action-button {
+            padding 8px 12px;
+            border-radius 8px;
+            font-weight bold;
+            color white;
+            cursor pointer;
+            transition background-color 0.2s;
+            margin-left 10px;
+            border none;
+        }
+        .complete-button {
+            background-color #28a745;  Green 
+        }
+        .complete-buttonhover {
+            background-color #218838;
+        }
+        .delete-button {
+            background-color #dc3545;  Red 
+        }
+        .delete-buttonhover {
+            background-color #c82333;
+        }
+        .detail-button {
+            background-color #ff9900;  Orange 
+        }
+        .detail-buttonhover {
+            background-color #e68a00;
+        }
+        .suggest-priority-button {
+            background-color #008080;  Teal for AI suggestion 
+        }
+        .suggest-priority-buttonhover {
+            background-color #006666;
+        }
+        .rewrite-description-button {
+            background-color #6a0dad;  Purple for rewrite description 
+        }
+        .rewrite-description-buttonhover {
+            background-color #5a0ca0;
+        }
+        .suggest-related-button {
+            background-color #4CAF50;  Green for related tasks 
+        }
+        .suggest-related-buttonhover {
+            background-color #45a049;
+        }
+        .filter-button {
+            background-color #007bff;
+        }
+        .filter-button-active {
+            background-color #0056b3;
+        }
+        .filter-buttonhovernot(.filter-button-active) {
+            background-color #0069d9;
+        }
+        .no-tasks-message {
+            text-align center;
+            color #777;
+            font-size 1.1em;
+            margin-top 30px;
+            padding 20px;
+            border 1px dashed #ccc;
+            border-radius 8px;
+            background-color #fdfdfd;
+        }
+        .loading-indicator {
+            text-align center;
+            color #555;
+            font-style italic;
+            margin-top 20px;
+        }
+         Tag Styling 
+        .tag-pill {
+            display inline-block;
+            padding 4px 8px;
+            border-radius 9999px;  Fully rounded 
+            font-size 0.8em;
+            margin-right 5px;
+            margin-top 5px;
+            font-weight 500;
+        }
+        .tag-pill-Urgente {
+            background-color #fee2e2;  light red 
+            color #ef4444;  red 
+            border 1px solid #fca5a5;
+        }
+        .tag-pill-Normal {
+            background-color #fffbeb;  light yellow 
+            color #f59e0b;  yellow 
+            border 1px solid #fcd34d;
+        }
+        .tag-pill-Leve {
+            background-color #dcfce7;  light green 
+            color #22c55e;  green 
+            border 1px solid #86efac;
+        }
+        @media (max-width 768px) {
+            .container {
+                margin 20px auto;
+                padding 15px;
+            }
+            .date-filter-buttons {
+                flex-direction column;
+            }
+            .filter-button {
+                margin-bottom 10px;
+                margin-right 0;
+            }
+            .task-item {
+                flex-direction column;
+                align-items flex-start;
+            }
+            .task-actions {
+                margin-top 10px;
+                margin-left 0;
+                width 100%;
+                justify-content flex-end;
+            }
+            .action-button {
+                margin-left 0;
+                margin-right 10px;
+            }
+        }
+    style
+head
+body class=bg-gray-100 p-4 min-h-screen flex items-center justify-center
+    div class=container w-full lgw-34 xlw-23
+        h1 class=text-3xl font-bold text-center mb-6 text-gray-800Minhas Tarefas + Calendárioh1
+        p id=userIdText class=text-xs text-gray-600 text-center mb-4ID do Utilizador Carregando...p
+
+        !-- Seção de Entrada para Novas Tarefas --
+        div class=bg-white p-6 rounded-lg shadow-md mb-8
+            input type=text id=newTaskTitle placeholder=Título da Tarefa
+                   class=w-full p-3 mb-4 border border-gray-300 rounded-lg focusoutline-none focusring-2 focusring-blue-500 text-lg
+            
+            div class=flex items-center mb-4
+                textarea id=newTaskDescription placeholder=Descrição detalhada da tarefa (opcional)
+                      rows=3 class=flex-1 p-3 border border-gray-300 rounded-lg focusoutline-none focusring-2 focusring-blue-500 text-lg resize-y mr-2textarea
+                button id=rewriteDescriptionButton
+                        class=action-button rewrite-description-button px-4 py-2 text-white font-semibold shadow-md self-end
+                    ✨ Reescrever Descrição
+                button
+            div
+
+            !-- Dropdown para Tags --
+            div class=flex items-center mb-4
+                select id=newTaskTag
+                        class=flex-1 p-3 border border-gray-300 rounded-lg focusoutline-none focusring-2 focusring-blue-500 text-lg bg-white mr-2
+                    option value=Selecione a Prioridadeoption
+                    option value=UrgenteUrgenteoption
+                    option value=NormalNormaloption
+                    option value=LeveLeveoption
+                select
+                button id=suggestPriorityButton
+                        class=action-button suggest-priority-button px-4 py-2 text-white font-semibold shadow-md
+                    ✨ Sugerir Prioridade
+                button
+            div
+
+
+            input type=date id=newTaskDate
+                   class=w-full p-3 mb-4 border border-gray-300 rounded-lg focusoutline-none focusring-2 focusring-blue-500 text-lg
+            input type=time id=newTaskTime placeholder=Hora (HHMM - opcional)
+                   class=w-full p-3 mb-4 border border-gray-300 rounded-lg focusoutline-none focusring-2 focusring-blue-500 text-lg
+            div class=flex items-center mb-6
+                label for=isReminderEnabled class=text-lg text-gray-700 mr-3 cursor-pointerHabilitar Lembretelabel
+                input type=checkbox id=isReminderEnabled class=form-checkbox h-6 w-6 text-blue-600 rounded-md
+            div
+            button id=addTaskButton
+                    class=w-full bg-blue-600 text-white p-3 rounded-lg hoverbg-blue-700 transition-colors duration-200 text-lg font-semibold shadow-md
+                Adicionar Tarefa
+            button
+        div
+
+        !-- Seção de Geração de Ideias com Gemini API --
+        div class=bg-white p-6 rounded-lg shadow-md mb-8
+            h2 class=text-2xl font-bold text-center mb-4 text-gray-800✨ Ferramentas de IA para Tarefash2
+            input type=text id=taskIdeasTheme placeholder=Tema para ideias de tarefas (ex 'casa', 'trabalho')
+                   class=w-full p-3 mb-4 border border-gray-300 rounded-lg focusoutline-none focusring-2 focusring-purple-500 text-lg
+            button id=generateTaskIdeasButton
+                    class=w-full bg-purple-600 text-white p-3 rounded-lg hoverbg-purple-700 transition-colors duration-200 text-lg font-semibold shadow-md
+                ✨ Gerar Idéias de Tarefas
+            button
+            p id=geminiLoadingIndicator class=loading-indicator hidden mt-4A carregar...p
+        div
+
+        !-- Seção de Filtro de Data (Dashboard) --
+        div class=flex flex-wrap justify-center gap-4 mb-8 date-filter-buttons
+            button id=filterToday
+                    class=filter-button px-6 py-3 rounded-lg text-white font-semibold shadow-md transition-colors duration-200 filter-button-active
+                Hoje
+            button
+            button id=filterTomorrow
+                    class=filter-button px-6 py-3 rounded-lg text-white font-semibold shadow-md transition-colors duration-200
+                Amanhã
+            button
+            button id=filterThisWeek
+                    class=filter-button px-6 py-3 rounded-lg text-white font-semibold shadow-md transition-colors duration-200
+                Esta Semana
+            button
+            button id=filterAll
+                    class=filter-button px-6 py-3 rounded-lg text-white font-semibold shadow-md transition-colors duration-200
+                Todas (Dashboard)
+            button
+        div
+
+        !-- Lista de Tarefas --
+        div id=taskList class=space-y-3
+            !-- Tasks will be injected here by JavaScript --
+            p id=noTasksMessage class=no-tasks-message hiddenNenhuma tarefa para esta data.p
+        div
+    div
+
+    !-- Firebase SDK --
+    script type=module
+        import { initializeApp } from httpswww.gstatic.comfirebasejs11.6.1firebase-app.js;
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from httpswww.gstatic.comfirebasejs11.6.1firebase-auth.js;
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, query, where, onSnapshot, doc, serverTimestamp } from httpswww.gstatic.comfirebasejs11.6.1firebase-firestore.js;
+
+        let app, db, auth, userId;
+        const appId = typeof __app_id !== 'undefined'  __app_id  'default-app-id';
+
+         Module-scoped variables for critical UI elements
+        let globalTaskListDiv;
+        let globalNoTasksMessage;
+
+         Function to show custom alert message (replaces native alert)
+        function showCustomAlert(title, message, contentHtml = '') {
+            const alertDiv = document.createElement('div');
+            alertDiv.style.cssText = `
+                position fixed;
+                top 50%;
+                left 50%;
+                transform translate(-50%, -50%);
+                background-color white;
+                padding 25px 35px;
+                border-radius 10px;
+                box-shadow 0 5px 15px rgba(0,0,0,0.3);
+                z-index 1000;
+                text-align center;
+                max-width 90%;
+                width 400px;
+                font-family 'Inter', sans-serif;
+                border 1px solid #ddd;
+            `;
+            alertDiv.innerHTML = `
+                h3 class=text-xl font-bold mb-3 text-gray-800${title}h3
+                p class=mb-5 text-gray-700${message}p
+                ${contentHtml}
+                button class=bg-blue-600 text-white px-5 py-2 rounded-lg hoverbg-blue-700 transition-colors onclick=this.parentNode.remove()OKbutton
+            `;
+            document.body.appendChild(alertDiv);
+        }
+
+        let selectedDateFilter = 'today';
+
+         Function to set up real-time listener for tasks
+        const setupTasksListener = () = {
+            if (!db  !userId) {
+                console.warn(Firestore ou User ID não estão prontos para configurar o listener.);
+                return;
+            }
+
+            const tasksCollectionRef = collection(db, `artifacts${appId}users${userId}tasks`);
+            let q;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+
+            const endOfTomorrow = new Date(tomorrow);
+            endOfTomorrow.setDate(tomorrow.getDate() + 1);
+            endOfTomorrow.setHours(0, 0, 0, 0);
+
+            if (selectedDateFilter === 'today') {
+                q = query(
+                    tasksCollectionRef,
+                    where('dueDate', '=', today.toISOString().split('T')[0]),
+                    where('dueDate', '', tomorrow.toISOString().split('T')[0])
+                );
+            } else if (selectedDateFilter === 'tomorrow') {
+                q = query(
+                    tasksCollectionRef,
+                    where('dueDate', '=', tomorrow.toISOString().split('T')[0]),
+                    where('dueDate', '', endOfTomorrow.toISOString().split('T')[0])
+                );
+            } else if (selectedDateFilter === 'thisWeek') {
+                const startOfWeek = new Date(today);
+                startOfWeek.setDate(today.getDate() - today.getDay());  Adjust to Sunday (0) or Monday (1) depending on locale
+                startOfWeek.setHours(0, 0, 0, 0);
+
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(startOfWeek.getDate() + 7);  7 days from start of week
+                endOfWeek.setHours(0, 0, 0, 0);
+
+                q = query(
+                    tasksCollectionRef,
+                    where('dueDate', '=', startOfWeek.toISOString().split('T')[0]),
+                    where('dueDate', '', endOfWeek.toISOString().split('T')[0])
+                );
+            }
+            else {  'all'
+                q = query(tasksCollectionRef);
+            }
+
+            onSnapshot(q, (snapshot) = {
+                const tasks = snapshot.docs.map(doc = ({
+                    id doc.id,
+                    ...doc.data()
+                }));
+                tasks.sort((a, b) = {
+                    const dateTimeA = new Date(`${a.dueDate}T${a.dueTime  '0000'}`);
+                    const dateTimeB = new Date(`${b.dueDate}T${b.dueTime  '0000'}`);
+                    return dateTimeA - dateTimeB;
+                });
+                renderTasks(tasks);
+            }, (error) = {
+                console.error(Erro ao carregar tarefas, error);
+                showCustomAlert(Erro, Não foi possível carregar as tarefas.);
+            });
+        };
+
+         Function to render tasks in the UI
+        const renderTasks = (tasks) = {
+             Use global references, which are guaranteed to be set if initializeUiAndListeners runs successfully
+            if (!globalTaskListDiv  !globalNoTasksMessage) {
+                console.error(Erro crítico Elementos da UI 'taskList' ou 'noTasksMessage' não encontrados na renderTasks. Isso indica um problema na inicialização.);
+                return;
+            }
+
+            globalTaskListDiv.innerHTML = '';  Clear existing tasks
+
+            if (tasks.length === 0) {
+                globalNoTasksMessage.classList.remove('hidden');
+            } else {
+                globalNoTasksMessage.classList.add('hidden');
+                tasks.forEach(task = {
+                    const taskItem = document.createElement('div');
+                    taskItem.classList.add('task-item', 'flex', 'items-center', 'justify-between', 'mb-3', 'p-4', 'rounded-lg', 'shadow-sm', 'border');
+                    if (task.completed) {
+                        taskItem.classList.add('task-completed');
+                    }
+
+                    const tagHtml = (task.tag)
+                         `div class=flex flex-wrap mt-2span class=tag-pill tag-pill-${task.tag}${task.tag}spandiv`
+                         '';
+
+                    taskItem.innerHTML = `
+                        div class=flex-1
+                            h3 class=task-title text-xl font-medium text-gray-900${task.title}h3
+                            ${task.description  `p class=task-description text-base text-gray-700 mt-1${task.description}p`  ''}
+                            ${tagHtml}
+                            p class=task-datetime text-sm text-gray-600 mt-1
+                                ${task.dueDate} ${task.dueTime  `às ${task.dueTime}`  ''}
+                                ${task.reminder  ' (Lembrete Ativado)'  ''}
+                            p
+                        div
+                        div class=task-actions flex items-center
+                            button data-id=${task.id} data-completed=${task.completed}
+                                    class=action-button complete-button px-4 py-2
+                                ${task.completed  'Desfazer'  'Concluir'}
+                            button
+                            button data-id=${task.id}
+                                    class=action-button delete-button px-4 py-2
+                                Excluir
+                            button
+                            button data-id=${task.id} data-title=${task.title} data-description=${task.description  ''} data-tag=${task.tag  ''}
+                                    class=action-button detail-button px-4 py-2
+                                ✨ Detalhar
+                            button
+                             button data-id=${task.id} data-title=${task.title} data-description=${task.description  ''}
+                                    class=action-button suggest-related-button px-4 py-2
+                                ✨ Sugerir Tarefas Relacionadas
+                            button
+                        div
+                    `;
+                    globalTaskListDiv.appendChild(taskItem);
+
+                    taskItem.querySelector('.complete-button').addEventListener('click', () = handleToggleComplete(task.id, task.completed));
+                    taskItem.querySelector('.delete-button').addEventListener('click', () = handleDeleteTask(task.id));
+                    taskItem.querySelector('.detail-button').addEventListener('click', (event) = {
+                        const title = event.target.dataset.title;
+                        const description = event.target.dataset.description;
+                        const tag = event.target.dataset.tag;
+                        handleDetailTask(title, description, tag);
+                    });
+                    taskItem.querySelector('.suggest-related-button').addEventListener('click', (event) = {
+                        const title = event.target.dataset.title;
+                        const description = event.target.dataset.description;
+                        handleSuggestRelatedTasks(title, description);
+                    });
+                });
+            }
+        };
+
+        const handleToggleComplete = async (id, completed) = {
+            try {
+                if (db && userId) {
+                    await updateDoc(doc(db, `artifacts${appId}users${userId}tasks`, id), {
+                        completed !completed,
+                    });
+                }
+            } catch (error) {
+                console.error(Erro ao atualizar tarefa, error);
+                showCustomAlert(Erro, Não foi possível atualizar o status da tarefa.);
+            }
+        };
+
+        const handleDeleteTask = async (id) = {
+            try {
+                if (db && userId) {
+                    await deleteDoc(doc(db, `artifacts${appId}users${userId}tasks`, id));
+                }
+            } catch (error) {
+                console.error(Erro ao excluir tarefa, error);
+                showCustomAlert(Erro, Não foi possível excluir a tarefa.);
+            }
+        };
+
+        const updateFilterButtons = (activeButtonId) = {
+            document.querySelectorAll('.filter-button').forEach(button = {
+                button.classList.remove('filter-button-active');
+            });
+            const activeButton = document.getElementById(activeButtonId);
+            if (activeButton) {
+                activeButton.classList.add('filter-button-active');
+            }
+        };
+
+         --- Gemini API Integration Functions ---
+        async function callGeminiAPI(prompt, responseSchema = null) {
+            const loadingIndicator = document.getElementById('geminiLoadingIndicator');
+            if (loadingIndicator) {
+                loadingIndicator.classList.remove('hidden');
+            }
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role user, parts [{ text prompt }] });
+
+                const payload = { contents chatHistory };
+                if (responseSchema) {
+                    payload.generationConfig = {
+                        responseMimeType applicationjson,
+                        responseSchema responseSchema
+                    };
+                }
+
+                const apiKey = ;
+                const apiUrl = `httpsgenerativelanguage.googleapis.comv1betamodelsgemini-2.0-flashgenerateContentkey=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method 'POST',
+                    headers { 'Content-Type' 'applicationjson' },
+                    body JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length  0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length  0) {
+                    if (responseSchema) {
+                        const json = result.candidates[0].content.parts[0].text;
+                        return JSON.parse(json);
+                    } else {
+                        return result.candidates[0].content.parts[0].text;
+                    }
+                } else {
+                    console.error(Resposta inesperada da API Gemini, result);
+                    showCustomAlert(Erro de IA, Não foi possível obter uma resposta detalhada da IA.);
+                    return null;
+                }
+            } catch (error) {
+                console.error(Erro ao chamar a API Gemini, error);
+                showCustomAlert(Erro de IA, Ocorreu um erro ao comunicar com o serviço de IA.);
+                return null;
+            } finally {
+                if (loadingIndicator) {
+                    loadingIndicator.classList.add('hidden');
+                }
+            }
+        }
+
+        async function handleDetailTask(taskTitle, taskDescription = '', taskTag = '') {
+            let prompt = `Detalhe a seguinte tarefa, fornecendo uma lista de sub-tarefas ou passos que seriam necessários para a sua conclusão. Seja conciso. Tarefa ${taskTitle}`;
+            if (taskDescription) {
+                prompt += ` Descrição ${taskDescription}.`;
+            }
+            if (taskTag) {
+                prompt += ` Prioridade ${taskTag}.`;
+            }
+            const details = await callGeminiAPI(prompt);
+
+            if (details) {
+                showCustomAlert(`Detalhes para ${taskTitle}`, '', `p class=text-left mb-4${details.replace(ng, 'br')}p`);
+            }
+        }
+
+        async function handleGenerateTaskIdeas() {
+            const themeInput = document.getElementById('taskIdeasTheme');
+            if (!themeInput) {
+                console.error(Erro Elemento 'taskIdeasTheme' não encontrado.);
+                return;
+            }
+            const theme = themeInput.value.trim();
+
+            if (theme === '') {
+                showCustomAlert(Erro, Por favor, insira um tema para gerar ideias.);
+                return;
+            }
+
+            const prompt = `Gere 5 ideias de tarefas com um título e uma breve descrição para o tema ${theme}. Formate a resposta como um array JSON de objetos, onde cada objeto tem as propriedades 'taskIdea' (string) e 'description' (string).`;
+            const responseSchema = {
+                type ARRAY,
+                items {
+                    type OBJECT,
+                    properties {
+                        taskIdea { type STRING },
+                        description { type STRING }
+                    },
+                    propertyOrdering [taskIdea, description]
+                }
+            };
+            const ideas = await callGeminiAPI(prompt, responseSchema);
+
+            if (ideas && ideas.length  0) {
+                let ideasHtml = 'ul class=text-left list-disc pl-5 mb-4';
+                ideas.forEach(idea = {
+                    ideasHtml += `listrong${idea.taskIdea}strong ${idea.description}li`;
+                });
+                ideasHtml += 'ul';
+                showCustomAlert(`Idéias para ${theme}`, 'Aqui estão algumas sugestões', ideasHtml);
+                themeInput.value = '';
+            } else if (ideas) {
+                 showCustomAlert(Sem Ideias, Não foi possível gerar ideias de tarefas para este tema. Tente um tema diferente.);
+            }
+        }
+
+        async function handleAddTaskClick() {
+            const titleInput = document.getElementById('newTaskTitle');
+            const descriptionInput = document.getElementById('newTaskDescription');
+            const tagInput = document.getElementById('newTaskTag');
+            const dateInput = document.getElementById('newTaskDate');
+            const timeInput = document.getElementById('newTaskTime');
+            const reminderCheckbox = document.getElementById('isReminderEnabled');
+
+            if (!titleInput  !descriptionInput  !tagInput  !dateInput  !timeInput  !reminderCheckbox) {
+                console.error(Erro Um ou mais elementos de input de tarefa não foram encontrados.);
+                showCustomAlert(Erro, Um erro interno impediu a adição da tarefa. Por favor, tente novamente.);
+                return;
+            }
+
+            const newTaskTitle = titleInput.value.trim();
+            const newTaskDescription = descriptionInput.value.trim();
+            const newTaskTag = tagInput.value;
+            const newTaskDate = dateInput.value.trim();
+            const newTaskTime = timeInput.value.trim();
+            const isReminderEnabled = reminderCheckbox.checked;
+
+            if (newTaskTitle === ''  newTaskDate === '') {
+                showCustomAlert(Erro, Por favor, insira um título e uma data para a tarefa.);
+                return;
+            }
+
+            try {
+                if (db && userId) {
+                    await addDoc(collection(db, `artifacts${appId}users${userId}tasks`), {
+                        title newTaskTitle,
+                        description newTaskDescription,
+                        tag newTaskTag,
+                        dueDate newTaskDate,
+                        dueTime newTaskTime  null,
+                        completed false,
+                        reminder isReminderEnabled,
+                        createdAt serverTimestamp(),
+                    });
+                    titleInput.value = '';
+                    descriptionInput.value = '';
+                    tagInput.value = '';
+                    dateInput.value = '';
+                    timeInput.value = '';
+                    reminderCheckbox.checked = false;
+                } else {
+                    showCustomAlert(Erro, Firebase não inicializado ou ID de utilizador ausente.);
+                }
+            } catch (error) {
+                console.error(Erro ao adicionar tarefa, error);
+                showCustomAlert(Erro, Não foi possível adicionar a tarefa.);
+            }
+        }
+
+         New function to suggest priority using Gemini API
+        async function handleSuggestPriority() {
+            const titleInput = document.getElementById('newTaskTitle');
+            const descriptionInput = document.getElementById('newTaskDescription');
+            const tagInput = document.getElementById('newTaskTag');
+
+            if (!titleInput  !descriptionInput  !tagInput) {
+                showCustomAlert(Erro, Um erro interno impediu a sugestão de prioridade. Certifique-se de que os campos de título e descrição existem.);
+                return;
+            }
+
+            const taskTitle = titleInput.value.trim();
+            const taskDescription = descriptionInput.value.trim();
+
+            if (taskTitle === '') {
+                showCustomAlert(Atenção, Por favor, preencha o título da tarefa para que a IA possa sugerir uma prioridade.);
+                return;
+            }
+
+             Prompt for Gemini to suggest priority
+            const prompt = `Dado o título da tarefa ${taskTitle} ${taskDescription  `e a descrição ${taskDescription}`  ''}. Sugira a prioridade da tarefa como 'Urgente', 'Normal' ou 'Leve'. Responda apenas com a palavra de prioridade.`;
+
+            try {
+                const suggestedPriority = await callGeminiAPI(prompt);
+                const validPriorities = ['Urgente', 'Normal', 'Leve'];
+
+                if (suggestedPriority && validPriorities.includes(suggestedPriority.trim())) {
+                    tagInput.value = suggestedPriority.trim();
+                    showCustomAlert(Sugestão de Prioridade, `A prioridade sugerida é ${suggestedPriority.trim()}.`);
+                } else {
+                    showCustomAlert(Sugestão de Prioridade, Não foi possível sugerir uma prioridade válida. Por favor, selecione manualmente ou tente um títulodescrição diferente.);
+                    console.warn(Prioridade sugerida inválida, suggestedPriority);
+                }
+            } catch (error) {
+                console.error(Erro ao sugerir prioridade, error);
+                showCustomAlert(Erro de IA, Não foi possível sugerir a prioridade da tarefa.);
+            }
+        }
+
+         New function to rewrite description using Gemini API
+        async function handleRewriteDescription() {
+            const descriptionInput = document.getElementById('newTaskDescription');
+            if (!descriptionInput) {
+                showCustomAlert(Erro, O campo de descrição da tarefa não foi encontrado.);
+                return;
+            }
+
+            const currentDescription = descriptionInput.value.trim();
+            if (currentDescription === '') {
+                showCustomAlert(Atenção, Por favor, insira uma descrição para que a IA possa reescrevê-la.);
+                return;
+            }
+
+            const prompt = `Reescreva a seguinte descrição de tarefa para torná-la mais clara, concisa e profissional ${currentDescription}.`;
+
+            try {
+                const rewrittenDescription = await callGeminiAPI(prompt);
+                if (rewrittenDescription) {
+                    descriptionInput.value = rewrittenDescription.trim();
+                    showCustomAlert(Descrição Reescreita, A descrição da tarefa foi reescrita com sucesso pela IA.);
+                } else {
+                    showCustomAlert(Reescrever Descrição, Não foi possível reescrever a descrição. Tente novamente.);
+                }
+            } catch (error) {
+                console.error(Erro ao reescrever descrição, error);
+                showCustomAlert(Erro de IA, Ocorreu um erro ao reescrever a descrição.);
+            }
+        }
+
+         New function to suggest related tasks using Gemini API
+        async function handleSuggestRelatedTasks(taskTitle, taskDescription = '') {
+            if (taskTitle === '') {
+                showCustomAlert(Atenção, O título da tarefa é necessário para sugerir tarefas relacionadas.);
+                return;
+            }
+
+            let prompt = `Sugira 2-3 tarefas relacionadas a esta tarefa, cada uma com um título e uma breve descrição. Formate a resposta como um array JSON de objetos, onde cada objeto tem as propriedades 'taskIdea' (string) e 'description' (string). Tarefa principal ${taskTitle}`;
+            if (taskDescription) {
+                prompt += ` Descrição da tarefa principal ${taskDescription}.`;
+            }
+
+            const responseSchema = {
+                type ARRAY,
+                items {
+                    type OBJECT,
+                    properties {
+                        taskIdea { type STRING },
+                        description { type STRING }
+                    },
+                    propertyOrdering [taskIdea, description]
+                }
+            };
+
+            try {
+                const relatedTasks = await callGeminiAPI(prompt, responseSchema);
+
+                if (relatedTasks && relatedTasks.length  0) {
+                    let tasksHtml = 'ul class=text-left list-disc pl-5 mb-4';
+                    relatedTasks.forEach(task = {
+                        tasksHtml += `listrong${task.taskIdea}strong ${task.description}li`;
+                    });
+                    tasksHtml += 'ul';
+                    showCustomAlert(`Tarefas Relacionadas para ${taskTitle}`, 'Aqui estão algumas sugestões', tasksHtml);
+                } else {
+                    showCustomAlert(Sem Sugestões, Não foi possível gerar tarefas relacionadas. Tente novamente.);
+                }
+            } catch (error) {
+                console.error(Erro ao sugerir tarefas relacionadas, error);
+                showCustomAlert(Erro de IA, Ocorreu um erro ao sugerir tarefas relacionadas.);
+            }
+        }
+
+
+         Initialize Firebase and attach all DOM event listeners after the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', async () = {
+            try {
+                const firebaseConfig = typeof __firebase_config !== 'undefined'  JSON.parse(__firebase_config)  {};
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                 Authenticate user
+                onAuthStateChanged(auth, async (user) = {
+                    if (user) {
+                        userId = user.uid;
+                        const userIdTextElement = document.getElementById('userIdText');
+                        if (userIdTextElement) {
+                           userIdTextElement.textContent = `ID do Utilizador ${userId}`;
+                        }
+
+                         Initialize UI and listeners only after authentication
+                        initializeUiAndListeners();
+
+                    } else {
+                         Sign in anonymously if no user is authenticated
+                        if (typeof __initial_auth_token !== 'undefined') {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error(Erro ao inicializar o Firebase, error);
+                showCustomAlert(Erro de Inicialização, Não foi possível conectar ao serviço de nuvem. Verifique o console para detalhes.);
+            }
+        });
+
+         Function to initialize UI elements and attach listeners
+        function initializeUiAndListeners() {
+             Get critical UI elements once and store them in globalmodule-scoped variables
+            globalTaskListDiv = document.getElementById('taskList');
+            globalNoTasksMessage = document.getElementById('noTasksMessage');
+
+             Add null checks for safety and prevent errors if elements are truly not found
+            const addTaskButton = document.getElementById('addTaskButton');
+            const filterTodayButton = document.getElementById('filterToday');
+            const filterTomorrowButton = document.getElementById('filterTomorrow');
+            const filterThisWeekButton = document.getElementById('filterThisWeek');
+            const filterAllButton = document.getElementById('filterAll');
+            const generateTaskIdeasButton = document.getElementById('generateTaskIdeasButton');
+            const suggestPriorityButton = document.getElementById('suggestPriorityButton');
+            const rewriteDescriptionButton = document.getElementById('rewriteDescriptionButton');
+
+            if (!globalTaskListDiv  !globalNoTasksMessage  !addTaskButton  !filterTodayButton 
+                !filterTomorrowButton  !filterThisWeekButton  !filterAllButton  !generateTaskIdeasButton 
+                !suggestPriorityButton  !rewriteDescriptionButton) {
+                console.error(Erro fatal Nem todos os elementos essenciais da UI foram encontrados ao inicializar listeners. A aplicação pode não funcionar corretamente.);
+                showCustomAlert(Erro Crítico, A interface da aplicação não foi carregada corretamente. Por favor, tente recarregar a página.);
+                return;
+            }
+
+             Attach all DOM event listeners here after elements are guaranteed to be loaded
+            addTaskButton.addEventListener('click', handleAddTaskClick);
+
+            filterTodayButton.addEventListener('click', () = {
+                selectedDateFilter = 'today';
+                updateFilterButtons('filterToday');
+                setupTasksListener();
+            });
+            filterTomorrowButton.addEventListener('click', () = {
+                selectedDateFilter = 'tomorrow';
+                updateFilterButtons('filterTomorrow');
+                setupTasksListener();
+            });
+            filterThisWeekButton.addEventListener('click', () = {
+                selectedDateFilter = 'thisWeek';
+                updateFilterButtons('filterThisWeek');
+                setupTasksListener();
+            });
+            filterAllButton.addEventListener('click', () = {
+                selectedDateFilter = 'all';
+                updateFilterButtons('filterAll');
+                setupTasksListener();
+            });
+
+            generateTaskIdeasButton.addEventListener('click', handleGenerateTaskIdeas);
+            suggestPriorityButton.addEventListener('click', handleSuggestPriority);
+            rewriteDescriptionButton.addEventListener('click', handleRewriteDescription);
+
+             Now that all DOM elements are ensured to be ready and event listeners are set up,
+             we can safely call setupTasksListener which will render tasks.
+            setupTasksListener();
+        }
+
+    script
+body
+html
